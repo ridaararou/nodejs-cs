@@ -1,10 +1,29 @@
 const express = require('express');
+const app = express();
 const cors = require('cors');
 const path = require('path');
+const methodOverride = require("method-override")
 
-const app = express();
 const PORT = process.env.PORT || 4000;
+const conn = require("./config/db.js");
+const routes = require("./routes/UserRoutes");
 
+
+// Using pug template engine
+app.set("views", path.join(__dirname, "views"))
+app.set("view engine", "pug")
+
+// connecting route to database
+app.use(async function(req, res, next) {
+  req.con = conn; //await conn.getConnection();
+  next()
+})
+
+// parsing body request
+// app.use(cors());
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(methodOverride("_method"))
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/views/index.html'))
@@ -16,69 +35,8 @@ app.get('/editor', (req, res) => {
   res.sendFile(path.join(__dirname, '/client/dist/index.html'))
 })
 
-// db
-const mariadb = require('mariadb');
-const pool = mariadb.createPool({
-  host: 'localhost', 
-  user:'root', 
-  password: '',
-  connectionLimit: 5,
-  database: 'image-editor',
-});
 
-var asyncFunction2 = new Promise(async function(myResolve, myReject) {
-  // "Producing Code" (May take some time)
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query("SELECT * from users");
-    var users = [];
-    rows.filter((el, index) => { users.push(el)});
-    // console.log(users); //[ {val: 1}, meta: ... ]
-    // const res = await conn.query("INSERT INTO myTable value (?, ?)", [1, "mariadb"]);
-    // console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-    myResolve(users);
-  } catch (err) {
-    myReject(err);
-	  throw err;
-  } finally {
-	  if (conn) return conn.end();
-  }
-});
-
-async function asyncFunction() {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query("SELECT * from users");
-    var users = [];
-    rows.filter((el, index) => { users.push(el)});
-    // console.log(users); //[ {val: 1}, meta: ... ]
-    // const res = await conn.query("INSERT INTO myTable value (?, ?)", [1, "mariadb"]);
-    // console.log(res); // { affectedRows: 1, insertId: 1, warningStatus: 0 }
-    return users;
-  } catch (err) {
-    return users;
-	  throw err;
-  } finally {
-	  if (conn) return conn.end();
-  }
-}
-
-app.get('/db', (req, res) => {
-  asyncFunction2.then((v) => {
-    console.log('users::', v)
-    res.send(users)
-  });
-  // conn = await pool.getConnection();
-  // const rows = await conn.query("SELECT * from users");
-  // var users = [];
-  // rows.filter((el, index) => { users.push(el)});
-
-})
-
-
-
+app.use('/user', routes);
 
 
 

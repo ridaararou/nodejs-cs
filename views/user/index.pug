@@ -1,0 +1,29 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="https://bootswatch.com/4/litera/bootstrap.min.css")
+    title Get users
+  body.container.py-5 
+
+    h1.mb-4 L2L Social Share Image Editor
+    a(href="http://localhost:3000/user/create").btn.btn-success.float-right Create #[b(style="font-size: 28px;vertical-align: -2px;line-height: 0;") +]
+    table.table
+      tr
+        th #
+        th image
+        th name
+        th email
+      for row, index in data
+        tr
+          td #{index + 1}
+          td 
+            img(src=row.profile_pic alt="profile image" width="60" height="60" style="object-fit: cover").rounded-circle
+          td #{row.name}
+          td #{row.email}
+          td
+            form.d-inline-block(action=`/user/${row.id}?_method=DELETE`, method="post")
+              input(type="submit", value="Delete").btn.btn-danger.mr-3 
+            a(href=`/user/${row.id}/edit`).btn.btn-primary Edit
