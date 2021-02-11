@@ -10,8 +10,8 @@ module.exports = {
       const rows = await conn.query("SELECT * from users");
       return rows;
     } catch (err) {
-      console.log('Error in userModel::', err)
-      throw err;
+      console.log('Error in userModel getAll::', err)
+      return {status: 404, message: err};
     } finally {
       if (conn) conn.release(); //release to pool
     }
