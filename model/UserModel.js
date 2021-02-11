@@ -1,13 +1,13 @@
 // USER Model
-var dbName = 'image-editor';
+var tableName = 'users';
 
 module.exports = {
   getAll: async function(con, callback) {
-    // con.query(`SELECT * FROM ${dbName}`, callback)
+    // con.query(`SELECT * FROM ${tableName}`, callback)
     console.log('user MODEL:');
     try {
       var conn = await con.getConnection();
-      const rows = await conn.query("SELECT * from users");
+      const rows = await conn.query(`SELECT * from ${tableName}`);
       return rows;
     } catch (err) {
       console.log('Error in userModel getAll::', err)
@@ -19,13 +19,13 @@ module.exports = {
   },
 
   getOne: async function(con, id, callback) {
-    // con.query(`SELECT * FROM ${dbName} WHERE id = ${id}`, callback)
+    // con.query(`SELECT * FROM ${tableName} WHERE id = ${id}`, callback)
     id = parseInt(id);
     if(typeof(id) !== 'number' && !isFinite(id) && Math.round(id) !== id)
       return {message: "ID should be a number"}
     try {
       var conn = await con.getConnection();
-      const row = await conn.query(`SELECT * FROM ${dbName} WHERE id = ${id}`);
+      const row = await conn.query(`SELECT * FROM ${tableName} WHERE id = ${id}`);
       return row;
     } catch (err) {
       console.log('Error in userModel::', err)
@@ -35,27 +35,54 @@ module.exports = {
     }
   },
 
-  create: function(con, data, callback) {
-    con.query(
-      `INSERT INTO ${dbName} SET 
-      nama = '${data.nama}', 
-      alamat = '${data.alamat}'`,
-      callback
-    )
+  create: async function(con, data, callback) {
+    try {
+      var conn = await con.getConnection();
+      const results = await conn.query("INSERT INTO users (name, email, profile_pic, password) values (?, ?, ?, ?)", data);
+      // console.log('model results:: create', results); 
+      // { affectedRows: 1, insertId: 1, warningStatus: 0 }
+      return results;
+    } catch (err) {
+      console.log('Error in userModel create::', err)
+      throw err;
+    } finally {
+      if (conn) conn.release(); //release to pool
+    }
+
   },
 
-  update: function(con, data, id, callback) {
-    con.query(
-      `UPDATE ${dbName} SET 
-      nama = '${data.nama}', 
-      alamat = '${data.alamat}' 
-      WHERE id_${dbName} = ${id}`,
-      callback
-    )
+  update: async function(con, id) {
+    
+    try {
+      var conn = await con.getConnection();
+      const results = await conn.query(`UPDATE ${tableName} SET name = '${data.name}', email = '${data.email}' , password = '${data.pass}', profile_pic = '${data.img}' WHERE id = ${id}`);
+      // console.log('model results:: update', results); 
+      // { affectedRows: 1, insertId: 1, warningStatus: 0 }
+      return results;
+    } catch (err) {
+      console.log('Error in userModel update::', err)
+      throw err;
+    } finally {
+      if (conn) conn.release(); //release to pool
+    }
   },
 
-  destroy: function(con, id, callback) {
-    con.query(`DELETE FROM ${dbName} WHERE id_${dbName} = ${id}`, callback)
+  destroy: async function(con, id) {
+    // con.query(`DELETE FROM ${tableName} WHERE id_${tableName} = ${id}`, callback)
+
+    try {
+      var conn = await con.getConnection();
+      const results = await conn.query(`DELETE FROM ${tableName} WHERE id = ${id}`);
+      console.log('model results:: delete', results); 
+      // { affectedRows: 1, insertId: 1, warningStatus: 0 }
+      return results;
+    } catch (err) {
+      console.log('Error in userModel delete::', err)
+      throw err;
+    } finally {
+      if (conn) conn.release(); //release to pool
+    }
+
   }
 }
 
